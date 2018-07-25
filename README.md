@@ -1,2 +1,0 @@
-# pilot_study
-
