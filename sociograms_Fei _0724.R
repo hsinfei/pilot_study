@@ -1,5 +1,5 @@
-## code written by Diego F. Leal (www.diegoleal.info)
-## last uptaded: 7/23/2018
+## code updatd by Fei
+## last uptaded: 7/24/2018
 
 ## clear all
 rm(list=ls(all=TRUE))
@@ -7,6 +7,7 @@ rm(list=ls(all=TRUE))
 ## call relevant packages
 library(network)
 library(sna)
+#library(gplots)
 
 ## import data
 load("C:/FAST_Study/Data/Cleaned Raw Data Master Copy/RENN_Cleaned.Rda")
@@ -154,25 +155,61 @@ set.vertex.attribute(net,"ideg",ideg)
 setwd("C:/FAST_Study/Data/Output_datafiles/plots")
 
 ##open a pdf
-pdf("renn_sociogram.pdf",width=15,height = 15) 
-
+pdf("renn_sociogram_Fei.pdf",width=15,height = 15) 
+colset = c("#9AABB9", "#E2B49A", "#D59BE1")
+data$color[data$gender==1] <- "#D59BE1"
+data$color[data$gender==2] <- "#9AABB9"
+data$color[data$gender==3] <- "#E2B49A"
 ## draw a sociogram
+q = layout_on_sphere(net)
+
+
 gplot(dat=net,
       gmode="digraph",                               ## directed network
       coord=capturedCoordinates,                     ## use the coordinates computed earlier
-      xlab = "Green = Boy; Blue = Girl; Red = NA",   ## add a legend
       displaylabels = T,                             ## display node-level labels
       pad = 0.005,                                   ## white space around sociogram
       label.pos=5,                                   ## nodes' labels should be inside the nodes
-      edge.col=rgb(red=0,green=0,blue=0,alpha=0.25), ## make ties clear graish
+      edge.col="#C5D2DB",                             ## make ties clear graish
       displayisolates = TRUE,                        ## show isolates
-      vertex.cex = (log(ideg))+0.005,                ## make nodes' sized a function of their indegree
-      vertex.border="grey",                          ## make nodes' borders be gray
+      vertex.cex = (log(ideg)),                      ## make nodes' sized a function of their indegree
+      vertex.border="white",                         ## make nodes' borders be gray
       label.cex = 0.9,                               ## label size
-      vertex.col=data$gender+1,                      ## nodes' color are a function of their gender
-      label.col="black"                              ## label color
+      vertex.col=data$color,                         ## nodes' color are a function of their gender
+      label.col="black",                             ## label color
+      layout = q
       )
+legend("topleft",legend=paste(c("Boy","Girl","NA")),col=colset,pch=rep(c(16,18),each=4),bty="n",cex=1,pt.cex=0.7)
 
+# updated 07/24
+net %v% 'short_ID' <- substring(net %v% 'vertex.names', 3)
+data$race = 0
+data$race[data$Q_race_eth == "Hispanic or Latino"]<-1
+data$color_c = '#e0b2ca'
+data$color_c[data$race==1] <- '#9ebac9'
+
+pdf("renn_sociogram_eth_Fei.pdf",width=20,height = 20) 
+
+gplot(dat=net,
+      gmode="digraph",                               ## directed network
+      coord = capturedCoordinates,                     ## use the coordinates computed earlier
+      label = net %v% 'short_ID',
+      displaylabels = T,                             ## display node-level labels
+      pad = 0.005,                                   ## white space around sociogram
+      label.pos=5,                                   ## nodes' labels should be inside the nodes
+      edge.col="#C5D2DB",                             ## make ties clear graish
+      displayisolates = TRUE,                        ## show isolates
+      vertex.cex = (log(ideg)),                      ## make nodes' sized a function of their indegree
+      vertex.border="white",                         ## make nodes' borders be gray
+      label.cex = 0.9,                               ## label size
+      vertex.col=data$color_c,                         ## nodes' color are a function of their gender
+      label.col="black",                             ## label color
+      layout = q
+)
+legend("topleft",legend=paste(c("non-Hispanic","Hispanic")),col= c('#e0b2ca','#9ebac9'),pch=rep(c(16,18),each=4),bty="n",cex=1,pt.cex=0.7)
+
+
+  
 ## close the pdf
 dev.off()
 
